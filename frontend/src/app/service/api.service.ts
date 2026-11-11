@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Category, Indicators, Movement, Product, ProductInput, RegisterInput } from '../Interface/models';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -9,8 +10,8 @@ export class ApiService {
   loggedIn = signal(Boolean(this.token));
   name = signal(sessionStorage.getItem('name') ?? '');
 
-  // /api pasa por el proxy de Angular; las pantallas no necesitan una URL localhost.
-  private url = '/api';
+  // La URL pública sale de environments; el proxy resuelve el destino de FastAPI.
+  private url = environment.apiUrl;
   private options() { return { headers: new HttpHeaders({ Authorization: `Bearer ${this.token}` }) }; }
 
   login(usuario: string, contrasena: string) {
