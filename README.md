@@ -6,7 +6,14 @@ Aplicación de inventario con registro de usuarios, productos, categorías, entr
 
 Esta guía crea una base **nueva** y carga seis productos de demostración. Las cuentas se crean durante la instalación con los nombres y contraseñas que tú elijas. Los usuarios y movimientos de otra instalación no se copian automáticamente.
 
-1. **Instala los programas:** SQL Server 2022 y SQL Server Management Studio (SSMS), Git, Python 3.12, Node.js 24.15 o posterior de la rama 24 y Microsoft ODBC Driver 18 for SQL Server. Necesitas acceso para crear una base en SQL Server. Comprueba `git --version`, `python --version`, `node --version` y `npm --version` en PowerShell. [Versiones compatibles con Angular 22](https://angular.dev/reference/versions) · [ODBC Driver 18](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server).
+1. **Instala los programas:** SQL Server 2022 y SQL Server Management Studio (SSMS), Git, Python 3.12, Node.js 24.15 o posterior de la rama 24 y Microsoft ODBC Driver 18 for SQL Server. Necesitas acceso para crear una base en SQL Server. Comprueba las versiones en PowerShell. [Versiones compatibles con Angular 22](https://angular.dev/reference/versions) · [ODBC Driver 18](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server).
+
+   ```powershell
+   git --version
+   python --version
+   node --version
+   npm --version
+   ```
 
 2. **Descarga el código:**
 
@@ -16,15 +23,27 @@ Esta guía crea una base **nueva** y carga seis productos de demostración. Las 
    git clone https://github.com/leandroIDK/TECNOSTOCK.git
    ```
 
-3. **Crea la base en SSMS.** Conéctate a SQL Server y anota el valor de **Nombre del servidor**. Abre y ejecuta estos archivos del proyecto **en este orden**: `database/01_schema.sql`, `database/02_procedures.sql`, `database/03_registro_web.sql` y `database/04_datos_demo.sql`. El primero crea la base `TecnoStock`; el cuarto instala el procedimiento de datos de prueba. Ejecútalos sobre una instancia donde no exista ya una base `TecnoStock` que quieras conservar. Los productos se cargarán en el paso 5.
+3. **Crea la base en SSMS.** Conéctate al SQL Server **de esa PC** y anota lo que aparece en **Nombre del servidor**. Abre cada archivo desde SSMS y ejecútalo con **F5**, uno por uno, en este orden:
 
-4. **Instala el backend y configura la conexión:**
+   1. `C:\proyectos\TECNOSTOCK\database\01_schema.sql`
+   2. `C:\proyectos\TECNOSTOCK\database\02_procedures.sql`
+   3. `C:\proyectos\TECNOSTOCK\database\03_registro_web.sql`
+   4. `C:\proyectos\TECNOSTOCK\database\04_datos_demo.sql`
+
+   Haz esto en una instancia donde no exista ya una base `TecnoStock` con datos que quieras conservar. El primer archivo crea la base; el cuarto prepara la carga de prueba. Los productos aparecerán después del paso 6.
+
+4. **Instala el backend.** Vuelve a PowerShell:
 
    ```powershell
    cd C:\proyectos\TECNOSTOCK\backend
    python -m venv .venv
    .\.venv\Scripts\python.exe -m pip install -r requirements.txt
    Copy-Item .env.example .env
+   ```
+
+5. **Configura la conexión.** En la misma ventana genera una clave de sesión y abre el archivo `.env`:
+
+   ```powershell
    .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_urlsafe(48))"
    notepad .env
    ```
@@ -43,22 +62,22 @@ Esta guía crea una base **nueva** y carga seis productos de demostración. Las 
 
    Sustituye los valores entre `< >` y elimina las líneas `DB_USER` y `DB_PASSWORD` del ejemplo. La cuenta de Windows debe tener permiso para ejecutar procedimientos en `TecnoStock`. Si usas autenticación SQL, cambia a `DB_AUTH=sql` y agrega `DB_USER` y `DB_PASSWORD` de un login autorizado; no uses `sa` para la aplicación.
 
-5. **Comprueba la conexión y crea las cuentas y productos:**
+6. **Comprueba la conexión y crea las cuentas y productos:**
 
    ```powershell
    .\.venv\Scripts\python.exe check_connection.py
    .\.venv\Scripts\python.exe setup_demo.py
    ```
 
-   El segundo comando pide DNI, nombre, apellido, usuario y contraseña para la primera cuenta; puedes crear otras en la misma ejecución. La contraseña se muestra con asteriscos y solo se guarda su hash bcrypt. Después se cargan cuatro categorías, seis productos y entradas iniciales de stock mediante un procedimiento almacenado. Puedes registrar más usuarios desde la página web. **Anota el usuario y recuerda su contraseña** para iniciar sesión.
+   La primera orden debe confirmar la conexión SQL y la configuración de sesión. **Si falla, detente aquí y corrige ese error antes de ejecutar la segunda orden.** `setup_demo.py` pide DNI, nombre, apellido, usuario y contraseña para la primera cuenta; puedes crear otras en la misma ejecución. La contraseña se muestra con asteriscos y solo se guarda su hash bcrypt. Después se cargan cuatro categorías, seis productos y entradas iniciales de stock mediante un procedimiento almacenado. Puedes registrar más usuarios desde la página web. **Anota el usuario y recuerda su contraseña** para iniciar sesión.
 
-6. **Inicia FastAPI** en esa misma ventana y déjala abierta:
+7. **Inicia FastAPI** en esa misma ventana y déjala abierta:
 
    ```powershell
    .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
    ```
 
-7. **Inicia Angular** en otra ventana de PowerShell:
+8. **Inicia Angular** en otra ventana de PowerShell:
 
    ```powershell
    cd C:\proyectos\TECNOSTOCK\frontend
