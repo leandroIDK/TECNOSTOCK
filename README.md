@@ -15,7 +15,7 @@ Sistema web de inventario para productos informáticos. Permite categorías, pro
 
 ## Preparación de SQL Server
 
-Se requiere SQL Server 2022 y un usuario SQL con permisos en la base. Ejecuta `database/01_schema.sql` y después `database/02_procedures.sql` en SQL Server Management Studio. El primer script se ejecuta **una vez**; el segundo usa `CREATE OR ALTER` y puede volver a ejecutarse.
+Se requiere SQL Server 2022 y una cuenta de Windows o SQL Server con permisos en la base. Ejecuta `database/01_schema.sql` y después `database/02_procedures.sql` en SQL Server Management Studio. El primer script se ejecuta **una vez**; el segundo usa `CREATE OR ALTER` y puede volver a ejecutarse.
 
 Las tablas empiezan vacías. No hay usuarios, categorías ni productos fijos en el código. Cada categoría se crea desde la aplicación. El valor referencial del panel es la suma de `stock actual × precio de compra` de los productos activos.
 
@@ -75,4 +75,4 @@ Abre `http://localhost:4200`. El archivo `proxy.conf.cjs` tiene una sola ruta: r
 
 ## Flujo Git
 
-Trabaja en ramas `codex/<funcionalidad>` o `<funcionalidad>`, haz commits descriptivos y abre un Pull Request por funcionalidad hacia la rama principal. El repositorio remoto se configura al publicarlo.
+El proyecto se integró desde `codex/inventario` hacia `main` mediante el [Pull Request #1](https://github.com/leandroIDK/TECNOSTOCK/pull/1). Para cambios posteriores, trabaja en una rama nueva, registra commits descriptivos y abre otro Pull Request hacia `main`.
