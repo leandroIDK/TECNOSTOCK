@@ -12,7 +12,7 @@
     <div class="side-bottom"><span>{{ api.name() }}</span><button (click)="api.logout()">Cerrar sesión</button></div>
   </aside>
   <main class="content">
-    <header class="topbar"><span>Gestión de inventario</span><strong>{{ api.name() }}</strong></header>
+    <header class="topbar"><span>Gestión de inventario</span><strong>{{ api.name() }}</strong><button type="button" class="link mobile-logout" (click)="api.logout()">Salir</button></header>
     @if (message()) { <div class="notice success" role="status">{{ message() }}</div> }
     @if (error()) { <div class="notice error" role="alert">{{ error() }}</div> }
 
