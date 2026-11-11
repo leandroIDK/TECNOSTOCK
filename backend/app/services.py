@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -8,6 +7,7 @@ from fastapi import HTTPException
 
 from app.repositories import Repository
 from app.schemas import RegistroUsuario
+from app.session_config import session_settings
 
 
 def execute(procedure, *parameters):
@@ -51,17 +51,22 @@ def login(usuario: str, contrasena: str):
     if (not rows or not rows[0]['activo'] or len(password_bytes) > 72
             or not bcrypt.checkpw(password_bytes, rows[0]['hash_contrasena'].encode())):
         raise HTTPException(401, 'Credenciales incorrectas')
-    secret = os.getenv('JWT_SECRET')
-    if not secret:
-        raise RuntimeError('Falta JWT_SECRET')
-    expires = datetime.now(timezone.utc) + timedelta(minutes=int(os.getenv('JWT_EXP_MINUTES', '120')))
+    try:
+        secret, minutes = session_settings()
+    except ValueError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    expires = datetime.now(timezone.utc) + timedelta(minutes=minutes)
     token = jwt.encode({'sub': str(rows[0]['id_usuario']), 'exp': expires}, secret, algorithm='HS256')
     return {'access_token': token, 'token_type': 'bearer', 'nombre': rows[0]['nombre']}
 
 
 def user_from_token(token: str):
     try:
-        payload = jwt.decode(token, os.environ['JWT_SECRET'], algorithms=['HS256'])
+        secret, _ = session_settings()
+    except ValueError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    try:
+        payload = jwt.decode(token, secret, algorithms=['HS256'])
         return int(payload['sub'])
     except (jwt.InvalidTokenError, KeyError, ValueError) as exc:
         raise HTTPException(401, 'Sesion invalida o vencida') from exc

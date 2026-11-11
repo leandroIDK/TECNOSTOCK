@@ -30,9 +30,9 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-Edita `.env` con el nombre o IP de la instancia SQL y una clave `JWT_SECRET` larga y aleatoria. `.env` está excluido de Git. `DB_AUTH=sql` usa `DB_USER` y `DB_PASSWORD`; `DB_AUTH=windows` usa la cuenta de Windows que ejecuta Python y no requiere esas dos variables. Usa el mismo nombre de servidor que ves en SSMS. Se puede usar una instancia remota o local: la ubicación de SQL Server se configura aquí y es independiente del proxy HTTP.
+Edita `.env` con el nombre o IP de la instancia SQL y una clave `JWT_SECRET` aleatoria de al menos 32 bytes. Puedes generarla con `python -c "import secrets; print(secrets.token_urlsafe(48))"` y copiar el resultado en `.env`. `.env` está excluido de Git. `DB_AUTH=sql` usa `DB_USER` y `DB_PASSWORD`; `DB_AUTH=windows` usa la cuenta de Windows que ejecuta Python y no requiere esas dos variables. Usa el mismo nombre de servidor que ves en SSMS. Se puede usar una instancia remota o local: la ubicación de SQL Server se configura aquí y es independiente del proxy HTTP. Si dos computadoras usan bases de datos distintas, sus usuarios y productos también serán distintos.
 
-Comprueba la conexión y que los procedimientos estén instalados:
+Comprueba la conexión, los procedimientos y la configuración de inicio de sesión:
 
 ```powershell
 python check_connection.py
@@ -47,6 +47,8 @@ uvicorn app.main:app --reload
 ```
 
 Abre la página y selecciona **Crear una cuenta**. El backend genera un hash bcrypt y solo guarda ese hash, nunca la contraseña original. La contraseña debe tener al menos 8 caracteres y no superar 72 bytes en UTF-8 (algunos caracteres ocupan más de un byte). `python create_admin.py` sigue disponible para crear una cuenta desde la terminal. Si no recuerdas su contraseña, usa `python reset_password.py`. La API estará en el puerto 8000 y su documentación interactiva en `/docs`.
+
+Si el registro funciona pero no el inicio de sesión, ejecuta `python check_connection.py` en `backend/`: ahora revisa tanto SQL Server como `JWT_SECRET`. Inicia sesión con el campo **Usuario**, no con el DNI. Un error 401 indica que el usuario o la contraseña no coinciden; un error 503 indica un problema de configuración del servidor. Las cuentas antiguas solo estarán disponibles en otra PC si ambas apuntan a la misma base de datos SQL Server.
 
 ## Frontend y proxy
 

@@ -33,7 +33,13 @@ export class LoginComponent {
     const { usuario, contrasena } = this.model();
     this.api.login(usuario, contrasena).subscribe({
       next: result => { this.busy.set(false); this.api.setSession(result.access_token, result.nombre); },
-      error: () => { this.busy.set(false); this.error.set('No se pudo iniciar sesión. Revisa tus credenciales.'); },
+      error: (response: HttpErrorResponse) => {
+        this.busy.set(false);
+        this.error.set(response.status === 401 ? 'Usuario o contraseña incorrectos.' :
+          response.status === 0 ? 'No se pudo conectar con el servidor. Revisa el backend y el proxy.' :
+          response.status === 503 ? 'El servidor necesita revisar su configuración. Ejecuta python check_connection.py en backend.' :
+          'El servidor no pudo iniciar sesión. Revisa el error en la terminal del backend.');
+      },
     });
   }
 
