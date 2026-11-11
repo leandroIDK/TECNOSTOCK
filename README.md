@@ -75,6 +75,10 @@ Abre `http://localhost:4200`. El archivo `proxy.conf.cjs` tiene una sola ruta: r
 6. Filtra productos por texto y categoría; filtra el historial por producto y rango de fechas.
 7. Consulta el panel y la vista de stock bajo después de cambiar existencias.
 
+## Pruebas automáticas
+
+En `frontend/`, ejecuta `npm run build` y `npm test -- --watch=false`. En `backend/`, ejecuta `python -m unittest discover -s tests`. La prueba opcional de integración SQL se activa en PowerShell con `$env:TECNOSTOCK_DB_TEST = '1'` antes de ejecutar el mismo comando de pruebas. Crea datos temporales mediante procedimientos almacenados y revierte la transacción, de modo que conserva los usuarios y productos existentes.
+
 ## Flujo Git
 
 El proyecto se integró desde `codex/inventario` hacia `main` mediante el [Pull Request #1](https://github.com/leandroIDK/TECNOSTOCK/pull/1). Para cambios posteriores, trabaja en una rama nueva, registra commits descriptivos y abre otro Pull Request hacia `main`.
