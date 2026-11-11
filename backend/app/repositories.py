@@ -12,6 +12,7 @@ class Repository:
             'sp_producto_crear', 'sp_producto_actualizar', 'sp_producto_desactivar',
             'sp_producto_listar', 'sp_producto_obtener',
             'sp_movimiento_registrar', 'sp_movimiento_listar', 'sp_indicadores',
+            'sp_demo_cargar',
         }
         if procedure not in allowed:
             raise ValueError('Procedimiento no permitido')
