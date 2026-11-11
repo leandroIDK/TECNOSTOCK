@@ -47,7 +47,7 @@ python create_admin.py
 uvicorn app.main:app --reload
 ```
 
-La contraseña se lee sin mostrarla, se transforma con bcrypt y solo se guarda su hash. La API estará en el puerto 8000 y su documentación interactiva en `/docs`.
+La contraseña se lee sin mostrarla, se transforma con bcrypt y solo se guarda su hash. Debe tener al menos 8 caracteres y no superar 72 bytes en UTF-8 (algunos caracteres ocupan más de un byte). La API estará en el puerto 8000 y su documentación interactiva en `/docs`.
 
 ## Frontend y proxy
 

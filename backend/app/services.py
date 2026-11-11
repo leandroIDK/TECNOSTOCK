@@ -29,9 +29,9 @@ def execute(procedure, *parameters):
 
 def login(usuario: str, contrasena: str):
     rows = execute('sp_usuario_por_nombre', usuario.strip())
-    if not rows or not rows[0]['activo'] or not bcrypt.checkpw(
-        contrasena.encode(), rows[0]['hash_contrasena'].encode()
-    ):
+    password_bytes = contrasena.encode('utf-8')
+    if (not rows or not rows[0]['activo'] or len(password_bytes) > 72
+            or not bcrypt.checkpw(password_bytes, rows[0]['hash_contrasena'].encode())):
         raise HTTPException(401, 'Credenciales incorrectas')
     secret = os.getenv('JWT_SECRET')
     if not secret:
