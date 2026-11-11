@@ -1,12 +1,28 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Login(BaseModel):
     usuario: str = Field(min_length=1, max_length=80)
     contrasena: str = Field(min_length=1)
+
+
+class RegistroUsuario(BaseModel):
+    dni: str = Field(pattern=r'^[0-9]{8}$')
+    nombre: str = Field(min_length=1, max_length=120)
+    apellido: str = Field(min_length=1, max_length=120)
+    usuario: str = Field(min_length=1, max_length=80)
+    contrasena: str = Field(min_length=8)
+
+    @field_validator('nombre', 'apellido', 'usuario')
+    @classmethod
+    def no_espacios_vacios(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError('Este campo es obligatorio')
+        return value
 
 
 class CategoriaNueva(BaseModel):

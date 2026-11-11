@@ -1,3 +1,11 @@
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_PADDING ON;
+SET ANSI_WARNINGS ON;
+SET ARITHABORT ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET NUMERIC_ROUNDABORT OFF;
+GO
 IF DB_ID(N'TecnoStock') IS NULL CREATE DATABASE TecnoStock;
 GO
 USE TecnoStock;
@@ -6,9 +14,12 @@ CREATE TABLE dbo.Usuarios (
     IdUsuario int IDENTITY(1,1) PRIMARY KEY,
     Usuario nvarchar(80) NOT NULL UNIQUE,
     Nombre nvarchar(120) NOT NULL,
+    Apellido nvarchar(120) NULL,
+    Dni char(8) NULL,
     HashContrasena nvarchar(255) NOT NULL,
     Activo bit NOT NULL CONSTRAINT DF_Usuarios_Activo DEFAULT 1
 );
+CREATE UNIQUE INDEX UX_Usuarios_Dni ON dbo.Usuarios(Dni) WHERE Dni IS NOT NULL;
 CREATE TABLE dbo.Categorias (
     IdCategoria int IDENTITY(1,1) PRIMARY KEY,
     Nombre nvarchar(100) NOT NULL UNIQUE,

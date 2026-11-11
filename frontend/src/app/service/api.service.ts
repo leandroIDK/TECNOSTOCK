@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { Category, Indicators, Movement, Product, ProductInput } from '../Interface/models';
+import { Category, Indicators, Movement, Product, ProductInput, RegisterInput } from '../Interface/models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -15,6 +15,9 @@ export class ApiService {
 
   login(usuario: string, contrasena: string) {
     return this.http.post<{ access_token: string; nombre: string }>(`${this.url}/auth/login`, { usuario, contrasena });
+  }
+  register(body: RegisterInput) {
+    return this.http.post<{ id_usuario: number }>(`${this.url}/auth/register`, body);
   }
   setSession(token: string, name: string) {
     this.token = token; this.name.set(name); this.loggedIn.set(true);

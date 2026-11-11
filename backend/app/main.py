@@ -3,8 +3,8 @@ from datetime import datetime
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.schemas import CategoriaNueva, Login, MovimientoNuevo, ProductoDatos
-from app.services import execute, login, user_from_token
+from app.schemas import CategoriaNueva, Login, MovimientoNuevo, ProductoDatos, RegistroUsuario
+from app.services import execute, login, register_user, user_from_token
 
 app = FastAPI(title='TecnoStock API')
 bearer = HTTPBearer()
@@ -17,6 +17,11 @@ def current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer)):
 @app.post('/api/auth/login')
 def authenticate(body: Login):
     return login(body.usuario, body.contrasena)
+
+
+@app.post('/api/auth/register', status_code=201)
+def register(body: RegistroUsuario):
+    return register_user(body)
 
 
 @app.get('/api/categorias')
