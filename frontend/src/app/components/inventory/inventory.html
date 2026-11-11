@@ -1,0 +1,106 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">TS</span><span>TecnoStock<small>Control de inventario</small></span></div>
+    <nav aria-label="Navegación principal">
+      <button [class.active]="section()==='panel'" (click)="navigate('panel')">Panel principal</button>
+      <button [class.active]="section()==='productos'" (click)="navigate('productos')">Productos</button>
+      <button [class.active]="section()==='categorias'" (click)="navigate('categorias')">Categorías</button>
+      <button [class.active]="section()==='movimientos'" (click)="navigate('movimientos')">Entradas y salidas</button>
+      <button [class.active]="section()==='historial'" (click)="navigate('historial')">Historial</button>
+      <button [class.active]="section()==='stock-bajo'" (click)="navigate('stock-bajo')">Stock bajo</button>
+    </nav>
+    <div class="side-bottom"><span>{{ api.name() }}</span><button (click)="api.logout()">Cerrar sesión</button></div>
+  </aside>
+  <main class="content">
+    <header class="topbar"><span>Gestión de inventario</span><strong>{{ api.name() }}</strong></header>
+    @if (message()) { <div class="notice success" role="status">{{ message() }}</div> }
+    @if (error()) { <div class="notice error" role="alert">{{ error() }}</div> }
+
+    @if (section()==='panel') {
+      <div class="page-heading"><span class="eyebrow">RESUMEN</span><h1>Panel principal</h1><p>Estado actual del inventario de TecnoStock.</p></div>
+      <div class="stat-grid">
+        <article class="stat"><span>Productos activos</span><strong>{{ indicators().productos_activos }}</strong><small>En el catálogo</small></article>
+        <article class="stat warning"><span>Con stock bajo</span><strong>{{ indicators().productos_stock_bajo }}</strong><small>Igual o debajo del mínimo</small></article>
+        <article class="stat"><span>Valor referencial</span><strong>{{ indicators().valor_inventario | currency:'PEN':'symbol':'1.2-2' }}</strong><small>Stock × precio de compra</small></article>
+      </div>
+      <section class="card"><div class="card-head"><h2>Movimientos recientes</h2><button class="link" (click)="navigate('historial')">Ver historial →</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Stock final</th></tr></thead>
+        <tbody>@for (m of movements().slice(0, 6); track m.id_movimiento) { <tr><td>{{ m.fecha | date:'dd/MM/yyyy' }}</td><td>{{ m.producto }}</td><td><span class="pill" [class.out]="m.tipo==='SALIDA'">{{ m.tipo }}</span></td><td>{{ m.cantidad }}</td><td>{{ m.stock_posterior }}</td></tr> }
+        @empty { <tr><td colspan="5">Todavía no hay movimientos.</td></tr> }</tbody></table></div></section>
+    }
+
+    @if (section()==='categorias') {
+      <div class="page-heading"><span class="eyebrow">CATÁLOGO</span><h1>Categorías</h1><p>Organiza los productos por tipo.</p></div>
+      <section class="card form-card"><h2>Nueva categoría</h2><form class="form-grid" (submit)="saveCategory($event)">
+        <label>Nombre *<input [formField]="categoryForm.nombre"></label>
+        <label>Descripción<input [formField]="categoryForm.descripcion"></label>
+        @if (categoryForm.nombre().touched() && categoryForm.nombre().invalid()) { <small class="field-error">El nombre es obligatorio.</small> }
+        <div class="form-actions"><button [disabled]="categoryForm().invalid() || busy()">Guardar categoría</button></div></form></section>
+      <section class="card"><div class="card-head"><h2>Categorías registradas</h2><span>{{ categories().length }}</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Descripción</th></tr></thead><tbody>
+          @for (c of categories(); track c.id_categoria) { <tr><td><strong>{{ c.nombre }}</strong></td><td>{{ c.descripcion || '—' }}</td></tr> }
+          @empty { <tr><td colspan="2">No hay categorías registradas.</td></tr> }
+        </tbody></table></div></section>
+    }
+
+    @if (section()==='productos') {
+      <div class="page-heading"><span class="eyebrow">CATÁLOGO</span><h1>Productos</h1><p>Registra, consulta y actualiza los equipos y accesorios.</p></div>
+      <section class="card form-card"><h2>{{ editId() ? 'Editar producto' : 'Nuevo producto' }}</h2>
+        <form class="form-grid" (submit)="saveProduct($event)">
+          <label>Código *<input [formField]="productForm.codigo"></label>
+          <label>Nombre *<input [formField]="productForm.nombre"></label>
+          <label class="wide">Descripción<textarea [formField]="productForm.descripcion" rows="2"></textarea></label>
+          <label>Categoría *<select [formField]="productForm.id_categoria"><option value="">Seleccionar</option>
+            @for (c of categories(); track c.id_categoria) { <option [value]="c.id_categoria">{{ c.nombre }}</option> }</select></label>
+          <label>Stock mínimo *<input type="number" step="1" [formField]="productForm.stock_minimo"></label>
+          <label>Precio de compra (S/) *<input type="number" step="0.01" [formField]="productForm.precio_compra"></label>
+          <label>Precio de venta (S/) *<input type="number" step="0.01" [formField]="productForm.precio_venta"></label>
+          @if (productForm().touched() && productForm().invalid()) { <small class="field-error wide">Completa código, nombre y categoría; usa precios mayores que cero y stock mínimo no negativo.</small> }
+          <div class="form-actions wide"><button [disabled]="productForm().invalid() || busy()">{{ editId() ? 'Guardar cambios' : 'Registrar producto' }}</button>
+            @if (editId()) { <button type="button" class="secondary" (click)="cancelEdit()">Cancelar</button> }</div>
+        </form></section>
+      <section class="card"><div class="card-head"><h2>Listado de productos</h2><span>{{ products().length }}</span></div>
+        <div class="filters"><input aria-label="Buscar producto" placeholder="Buscar por código o nombre" [value]="search()" (input)="search.set($any($event.target).value); loadProducts()">
+          <select aria-label="Filtrar categoría" [value]="categoryFilter()" (change)="categoryFilter.set($any($event.target).value); loadProducts()"><option value="">Todas las categorías</option>
+          @for (c of categories(); track c.id_categoria) { <option [value]="c.id_categoria">{{ c.nombre }}</option> }</select></div>
+        <div class="table-wrap"><table><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Compra</th><th>Venta</th><th>Stock</th><th>Acciones</th></tr></thead><tbody>
+          @for (p of products(); track p.id_producto) { <tr><td>{{ p.codigo }}</td><td><strong>{{ p.nombre }}</strong><small class="subline">{{ p.descripcion }}</small></td><td>{{ p.categoria }}</td><td>{{ p.precio_compra | currency:'PEN':'symbol':'1.2-2' }}</td><td>{{ p.precio_venta | currency:'PEN':'symbol':'1.2-2' }}</td><td><span [class.low]="p.stock_actual<=p.stock_minimo">{{ p.stock_actual }}</span></td><td><button class="link" (click)="edit(p)">Editar</button><button class="link danger" (click)="deactivate(p)">Desactivar</button></td></tr> }
+          @empty { <tr><td colspan="7">No se encontraron productos.</td></tr> }
+        </tbody></table></div></section>
+    }
+
+    @if (section()==='movimientos') {
+      <div class="page-heading"><span class="eyebrow">OPERACIONES</span><h1>Entradas y salidas</h1><p>Registra cada movimiento y actualiza el stock.</p></div>
+      <section class="card form-card"><h2>Nuevo movimiento</h2><form class="form-grid" (submit)="saveMovement($event)">
+        <label>Producto *<select [formField]="movementForm.id_producto"><option value="">Seleccionar producto</option>
+          @for (p of allProducts(); track p.id_producto) { <option [value]="p.id_producto">{{ p.codigo }} · {{ p.nombre }} (stock {{ p.stock_actual }})</option> }</select></label>
+        <label>Tipo *<select [formField]="movementForm.tipo"><option value="ENTRADA">Entrada</option><option value="SALIDA">Salida</option></select></label>
+        <label>Cantidad *<input type="number" step="1" [formField]="movementForm.cantidad"></label>
+        <label>Fecha *<input type="date" [formField]="movementForm.fecha"></label>
+        <label class="wide">Motivo *<textarea [formField]="movementForm.motivo" rows="2"></textarea></label>
+        @if (movementForm().touched() && movementForm().invalid()) { <small class="field-error wide">Selecciona un producto y registra cantidad, fecha y motivo válidos.</small> }
+        <div class="form-actions wide"><button [disabled]="movementForm().invalid() || busy()">Registrar movimiento</button></div>
+      </form></section>
+    }
+
+    @if (section()==='historial') {
+      <div class="page-heading"><span class="eyebrow">TRAZABILIDAD</span><h1>Historial de movimientos</h1><p>Consulta entradas y salidas por producto y fechas.</p></div>
+      <section class="card"><div class="filters"><select aria-label="Producto" [value]="historyProduct()" (change)="historyProduct.set($any($event.target).value); loadMovements()"><option value="">Todos los productos</option>
+        @for (p of allProducts(); track p.id_producto) { <option [value]="p.id_producto">{{ p.codigo }} · {{ p.nombre }}</option> }</select>
+        <label>Desde<input type="date" [value]="from()" (change)="from.set($any($event.target).value); loadMovements()"></label>
+        <label>Hasta<input type="date" [value]="to()" (change)="to.set($any($event.target).value); loadMovements()"></label></div>
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th><th>Antes</th><th>Después</th></tr></thead><tbody>
+          @for (m of movements(); track m.id_movimiento) { <tr><td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ m.codigo }} · {{ m.producto }}</td><td><span class="pill" [class.out]="m.tipo==='SALIDA'">{{ m.tipo }}</span></td><td>{{ m.cantidad }}</td><td>{{ m.motivo }}</td><td>{{ m.stock_anterior }}</td><td>{{ m.stock_posterior }}</td></tr> }
+          @empty { <tr><td colspan="7">No hay movimientos para estos filtros.</td></tr> }
+        </tbody></table></div></section>
+    }
+
+    @if (section()==='stock-bajo') {
+      <div class="page-heading"><span class="eyebrow">ALERTAS</span><h1>Productos con stock bajo</h1><p>Existencias iguales o inferiores al mínimo definido.</p></div>
+      <section class="card"><div class="table-wrap"><table><thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock actual</th><th>Stock mínimo</th></tr></thead><tbody>
+        @for (p of products(); track p.id_producto) { <tr><td>{{ p.codigo }}</td><td><strong>{{ p.nombre }}</strong></td><td>{{ p.categoria }}</td><td class="low">{{ p.stock_actual }}</td><td>{{ p.stock_minimo }}</td></tr> }
+        @empty { <tr><td colspan="5">No hay productos con stock bajo.</td></tr> }
+      </tbody></table></div></section>
+    }
+  </main>
+</div>
