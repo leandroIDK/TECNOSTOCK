@@ -6,7 +6,7 @@ class Repository:
     @staticmethod
     def call(procedure: str, *parameters):
         allowed = {
-            'sp_usuario_crear', 'sp_usuario_por_nombre',
+            'sp_usuario_crear', 'sp_usuario_por_nombre', 'sp_usuario_cambiar_hash',
             'sp_categoria_crear', 'sp_categoria_listar',
             'sp_producto_crear', 'sp_producto_actualizar', 'sp_producto_desactivar',
             'sp_producto_listar', 'sp_producto_obtener',

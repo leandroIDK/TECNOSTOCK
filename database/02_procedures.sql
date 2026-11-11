@@ -17,6 +17,15 @@ BEGIN
  SELECT IdUsuario, Usuario, Nombre, HashContrasena, Activo FROM dbo.Usuarios WHERE Usuario=@Usuario;
 END;
 GO
+CREATE OR ALTER PROCEDURE dbo.sp_usuario_cambiar_hash
+ @Usuario nvarchar(80), @HashContrasena nvarchar(255)
+AS
+BEGIN
+ SET NOCOUNT ON;
+ UPDATE dbo.Usuarios SET HashContrasena=@HashContrasena WHERE Usuario=@Usuario AND Activo=1;
+ IF @@ROWCOUNT=0 THROW 50008, 'Usuario activo no encontrado.', 1;
+END;
+GO
 CREATE OR ALTER PROCEDURE dbo.sp_categoria_crear @Nombre nvarchar(100), @Descripcion nvarchar(400)
 AS
 BEGIN
