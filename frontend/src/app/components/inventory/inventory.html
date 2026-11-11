@@ -25,7 +25,7 @@
       </div>
       <section class="card"><div class="card-head"><h2>Movimientos recientes</h2><button class="link" (click)="navigate('historial')">Ver historial →</button></div>
         <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Stock final</th></tr></thead>
-        <tbody>@for (m of movements().slice(0, 6); track m.id_movimiento) { <tr><td>{{ m.fecha | date:'dd/MM/yyyy' }}</td><td>{{ m.producto }}</td><td><span class="pill" [class.out]="m.tipo==='SALIDA'">{{ m.tipo }}</span></td><td>{{ m.cantidad }}</td><td>{{ m.stock_posterior }}</td></tr> }
+        <tbody>@for (m of recentMovements().slice(0, 6); track m.id_movimiento) { <tr><td>{{ m.fecha | date:'dd/MM/yyyy' }}</td><td>{{ m.producto }}</td><td><span class="pill" [class.out]="m.tipo==='SALIDA'">{{ m.tipo }}</span></td><td>{{ m.cantidad }}</td><td>{{ m.stock_posterior }}</td></tr> }
         @empty { <tr><td colspan="5">Todavía no hay movimientos.</td></tr> }</tbody></table></div></section>
     }
 

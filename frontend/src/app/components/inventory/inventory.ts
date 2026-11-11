@@ -9,6 +9,10 @@ type Section = 'panel' | 'productos' | 'categorias' | 'movimientos' | 'historial
 type ProductForm = Omit<ProductInput, 'id_categoria'> & { id_categoria: string };
 const emptyProduct = (): ProductForm => ({ codigo: '', nombre: '', descripcion: '', id_categoria: '',
   precio_compra: 0, precio_venta: 0, stock_minimo: 0 });
+const todayLocal = () => {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
 
 @Component({
   selector: 'app-inventory', imports: [FormField, CurrencyPipe, DatePipe],
@@ -21,6 +25,7 @@ export class InventoryComponent {
   products = signal<Product[]>([]);
   allProducts = signal<Product[]>([]);
   movements = signal<Movement[]>([]);
+  recentMovements = signal<Movement[]>([]);
   indicators = signal<Indicators>({ productos_activos: 0, productos_stock_bajo: 0, valor_inventario: 0 });
   message = signal(''); error = signal(''); busy = signal(false);
   search = signal(''); categoryFilter = signal('');
@@ -36,7 +41,7 @@ export class InventoryComponent {
     min(s.precio_compra, 0.01); min(s.precio_venta, 0.01); min(s.stock_minimo, 0);
   });
   movementModel = signal({ id_producto: '', tipo: 'ENTRADA', cantidad: 1,
-    fecha: new Date().toISOString().slice(0, 10), motivo: '' });
+    fecha: todayLocal(), motivo: '' });
   movementForm = form(this.movementModel, s => {
     required(s.id_producto); min(s.cantidad, 1); required(s.fecha); required(s.motivo); maxLength(s.motivo, 400);
   });
@@ -47,6 +52,7 @@ export class InventoryComponent {
     this.section.set(section); this.message.set(''); this.error.set('');
     if (section === 'stock-bajo' || section === 'productos') this.loadProducts();
     if (section === 'historial' || section === 'movimientos') this.loadMovements();
+    if (section === 'panel') this.refreshAll();
   }
   private fail(error: unknown) {
     if (error instanceof HttpErrorResponse && error.status === 401) { this.api.logout(); return; }
@@ -57,10 +63,11 @@ export class InventoryComponent {
   refreshAll() {
     this.api.categories().subscribe({ next: data => this.categories.set(data), error: e => this.fail(e) });
     this.api.indicators().subscribe({ next: data => this.indicators.set(data), error: e => this.fail(e) });
-    this.loadProducts(); this.loadMovements();
+    this.loadProducts(); this.loadMovements(); this.loadRecentMovements();
   }
   loadProducts() {
-    this.api.products(this.search(), this.categoryFilter(), this.section() === 'stock-bajo').subscribe({
+    const lowStock = this.section() === 'stock-bajo';
+    this.api.products(lowStock ? '' : this.search(), lowStock ? '' : this.categoryFilter(), lowStock).subscribe({
       next: data => this.products.set(data), error: e => this.fail(e),
     });
     this.api.products().subscribe({ next: data => this.allProducts.set(data), error: e => this.fail(e) });
@@ -68,6 +75,11 @@ export class InventoryComponent {
   loadMovements() {
     this.api.movements(this.historyProduct(), this.from(), this.to()).subscribe({
       next: data => this.movements.set(data), error: e => this.fail(e),
+    });
+  }
+  loadRecentMovements() {
+    this.api.movements().subscribe({
+      next: data => this.recentMovements.set(data), error: e => this.fail(e),
     });
   }
   saveCategory(event: Event) {
@@ -106,7 +118,7 @@ export class InventoryComponent {
     this.api.addMovement({ ...data, id_producto: Number(data.id_producto), fecha: `${data.fecha}T12:00:00` }).subscribe({
       next: () => { this.busy.set(false); this.message.set('Movimiento registrado y stock actualizado.');
         this.movementForm().reset({ id_producto: '', tipo: 'ENTRADA', cantidad: 1,
-          fecha: new Date().toISOString().slice(0, 10), motivo: '' }); this.refreshAll(); },
+          fecha: todayLocal(), motivo: '' }); this.refreshAll(); },
       error: e => this.fail(e),
     });
   }
