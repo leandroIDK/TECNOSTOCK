@@ -7,6 +7,7 @@ Sistema web de inventario para productos informáticos. Permite registro e inici
 - `frontend/src/app/components/`: componentes de login e inventario.
 - `frontend/src/app/Interface/`: interfaces de los datos.
 - `frontend/src/app/service/`: servicio HTTP; usa rutas relativas `/api`.
+- `frontend/src/environments/environment.ts`: configura la ruta pública `/api` para el servicio Angular; el destino real se indica al proxy.
 - `backend/app/main.py`: endpoints FastAPI.
 - `backend/app/schemas.py`: validación de datos.
 - `backend/app/services.py`: reglas y manejo de errores, autenticación JWT y comprobación bcrypt.
