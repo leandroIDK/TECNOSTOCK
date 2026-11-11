@@ -2,8 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormField, form, maxLength, min, required } from '@angular/forms/signals';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ApiService } from './api.service';
-import { Category, Indicators, Movement, Product, ProductInput } from './models';
+import { ApiService } from '../../service/api.service';
+import { Category, Indicators, Movement, Product, ProductInput } from '../../Interface/models';
 
 type Section = 'panel' | 'productos' | 'categorias' | 'movimientos' | 'historial' | 'stock-bajo';
 type ProductForm = Omit<ProductInput, 'id_categoria'> & { id_categoria: string };

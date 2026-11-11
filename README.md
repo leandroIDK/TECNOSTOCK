@@ -4,7 +4,9 @@ Sistema web de inventario para productos informáticos. Permite categorías, pro
 
 ## Tecnologías y estructura
 
-- `frontend/`: Angular 22 y Signal Forms. Los servicios HTTP usan rutas relativas `/api`.
+- `frontend/src/app/components/`: componentes de login e inventario.
+- `frontend/src/app/Interface/`: interfaces de los datos.
+- `frontend/src/app/service/`: servicio HTTP; usa rutas relativas `/api`.
 - `backend/app/main.py`: endpoints FastAPI.
 - `backend/app/schemas.py`: validación de datos.
 - `backend/app/services.py`: reglas y manejo de errores, autenticación JWT y comprobación bcrypt.
@@ -28,7 +30,15 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-Edita `.env` con el nombre o IP de la instancia SQL, las credenciales y una clave `JWT_SECRET` larga y aleatoria. `.env` está excluido de Git. Se puede usar una instancia remota o local: la ubicación de SQL Server se configura aquí y es independiente del proxy HTTP.
+Edita `.env` con el nombre o IP de la instancia SQL y una clave `JWT_SECRET` larga y aleatoria. `.env` está excluido de Git. `DB_AUTH=sql` usa `DB_USER` y `DB_PASSWORD`; `DB_AUTH=windows` usa la cuenta de Windows que ejecuta Python y no requiere esas dos variables. Usa el mismo nombre de servidor que ves en SSMS. Se puede usar una instancia remota o local: la ubicación de SQL Server se configura aquí y es independiente del proxy HTTP.
+
+Comprueba la conexión y que los procedimientos estén instalados:
+
+```powershell
+python check_connection.py
+```
+
+Para el primer usuario de la aplicación, el usuario de base de datos necesita permiso de ejecución sobre los procedimientos de `dbo`. Si usas un usuario SQL con permisos limitados, asígnale `EXECUTE` sobre ese esquema en TecnoStock.
 
 Tras ejecutar los scripts SQL, crea el primer usuario desde la terminal:
 

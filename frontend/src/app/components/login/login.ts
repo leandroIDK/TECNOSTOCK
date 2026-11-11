@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormField, form, required } from '@angular/forms/signals';
-import { ApiService } from './api.service';
+import { ApiService } from '../../service/api.service';
 
 @Component({
   selector: 'app-login', imports: [FormField],

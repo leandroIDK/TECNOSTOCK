@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { Category, Indicators, Movement, Product, ProductInput } from './models';
+import { Category, Indicators, Movement, Product, ProductInput } from '../Interface/models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
