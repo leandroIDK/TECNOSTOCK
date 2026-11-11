@@ -14,3 +14,6 @@ export interface Movement {
   stock_anterior: number; stock_posterior: number; usuario: string;
 }
 export interface Indicators { productos_activos: number; productos_stock_bajo: number; valor_inventario: number; }
+export interface RegisterInput {
+  dni: string; nombre: string; apellido: string; usuario: string; contrasena: string;
+}

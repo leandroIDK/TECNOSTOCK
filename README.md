@@ -1,6 +1,6 @@
 # TecnoStock
 
-Sistema web de inventario para productos informáticos. Permite categorías, productos, entradas, salidas, historial, stock bajo e indicadores.
+Sistema web de inventario para productos informáticos. Permite registro e inicio de sesión de usuarios, categorías, productos, entradas, salidas, historial, stock bajo e indicadores.
 
 ## Tecnologías y estructura
 
@@ -15,9 +15,9 @@ Sistema web de inventario para productos informáticos. Permite categorías, pro
 
 ## Preparación de SQL Server
 
-Se requiere SQL Server 2022 y una cuenta de Windows o SQL Server con permisos en la base. Ejecuta `database/01_schema.sql` y después `database/02_procedures.sql` en SQL Server Management Studio. El primer script se ejecuta **una vez**; el segundo usa `CREATE OR ALTER` y puede volver a ejecutarse.
+Se requiere SQL Server 2022 y una cuenta de Windows o SQL Server con permisos en la base. En una instalación nueva, ejecuta `database/01_schema.sql`, luego `database/02_procedures.sql` y finalmente `database/03_registro_web.sql` en SQL Server Management Studio. El primer script se ejecuta **una vez**; los otros dos pueden volver a ejecutarse. Si ya tenías TecnoStock funcionando, ejecuta **solo** `03_registro_web.sql` para añadir DNI, apellido y registro web sin borrar usuarios, productos ni movimientos.
 
-Las tablas empiezan vacías. No hay usuarios, categorías ni productos fijos en el código. Cada categoría se crea desde la aplicación. El valor referencial del panel es la suma de `stock actual × precio de compra` de los productos activos.
+Las tablas empiezan vacías. No hay usuarios, categorías ni productos fijos en el código. Cada persona puede crear su cuenta en la pantalla inicial con DNI, nombre, apellido, usuario y contraseña. El DNI y el usuario deben ser únicos. Los usuarios creados antes de esta ampliación conservan su acceso; sus campos DNI y apellido quedan vacíos. Cada categoría se crea desde la aplicación. El valor referencial del panel es la suma de `stock actual × precio de compra` de los productos activos.
 
 ## Backend
 
@@ -40,14 +40,13 @@ python check_connection.py
 
 Para el primer usuario de la aplicación, el usuario de base de datos necesita permiso de ejecución sobre los procedimientos de `dbo`. Si usas un usuario SQL con permisos limitados, asígnale `EXECUTE` sobre ese esquema en TecnoStock.
 
-Tras ejecutar los scripts SQL, crea el primer usuario desde la terminal:
+Tras ejecutar los scripts SQL, inicia el servidor:
 
 ```powershell
-python create_admin.py
 uvicorn app.main:app --reload
 ```
 
-Al escribir la contraseña en Windows se muestran asteriscos y se pide repetirla. Se transforma con bcrypt y solo se guarda su hash. Debe tener al menos 8 caracteres y no superar 72 bytes en UTF-8 (algunos caracteres ocupan más de un byte). Si no recuerdas la contraseña del primer usuario, vuelve a ejecutar `database/02_procedures.sql` y luego usa `python reset_password.py`. La API estará en el puerto 8000 y su documentación interactiva en `/docs`.
+Abre la página y selecciona **Crear una cuenta**. El backend genera un hash bcrypt y solo guarda ese hash, nunca la contraseña original. La contraseña debe tener al menos 8 caracteres y no superar 72 bytes en UTF-8 (algunos caracteres ocupan más de un byte). `python create_admin.py` sigue disponible para crear una cuenta desde la terminal. Si no recuerdas su contraseña, usa `python reset_password.py`. La API estará en el puerto 8000 y su documentación interactiva en `/docs`.
 
 ## Frontend y proxy
 

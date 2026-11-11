@@ -7,6 +7,7 @@ import pyodbc
 from fastapi import HTTPException
 
 from app.repositories import Repository
+from app.schemas import RegistroUsuario
 
 
 def execute(procedure, *parameters):
@@ -24,7 +25,24 @@ def execute(procedure, *parameters):
             raise HTTPException(400, 'La categoria o el usuario no existe') from exc
         if any(str(code) in message for code in range(50001, 50007)):
             raise HTTPException(400, 'Datos invalidos') from exc
+        if '50009' in message or '50010' in message:
+            raise HTTPException(400, 'Datos de registro invalidos') from exc
         raise HTTPException(503, 'No se pudo completar la operacion de base de datos') from exc
+
+
+def register_user(body: RegistroUsuario):
+    password_bytes = body.contrasena.encode('utf-8')
+    if len(password_bytes) > 72:
+        raise HTTPException(422, 'La contrasena supera el limite de 72 bytes de bcrypt')
+    password_hash = bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode()
+    try:
+        result = execute('sp_usuario_registrar', body.dni, body.nombre, body.apellido,
+                         body.usuario, password_hash)[0]
+    except HTTPException as exc:
+        if exc.status_code == 409:
+            raise HTTPException(409, 'El usuario o DNI ya esta registrado') from exc
+        raise
+    return result
 
 
 def login(usuario: str, contrasena: str):

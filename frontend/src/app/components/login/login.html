@@ -1,0 +1,38 @@
+<main class="login-page">
+  <section class="login-card">
+    <span class="eyebrow">TECNOSTOCK</span>
+    <h1>{{ registerMode() ? 'Crea tu cuenta' : 'Control de inventario' }}</h1>
+    <p>{{ registerMode() ? 'Completa tus datos para ingresar al sistema.' : 'Ingresa para administrar productos y movimientos.' }}</p>
+
+    @if (success()) { <div class="notice success" role="status">{{ success() }}</div> }
+    @if (error()) { <div class="notice error" role="alert">{{ error() }}</div> }
+
+    @if (registerMode()) {
+      <form (submit)="submitRegistration($event)">
+        <label>DNI *<input inputmode="numeric" autocomplete="off" [formField]="registrationFields.dni"></label>
+        @if (registrationFields.dni().touched() && registrationFields.dni().invalid()) { <small>Ingresa 8 dígitos.</small> }
+        <label>Nombre *<input autocomplete="given-name" [formField]="registrationFields.nombre"></label>
+        @if (registrationFields.nombre().touched() && registrationFields.nombre().invalid()) { <small>Ingresa tu nombre.</small> }
+        <label>Apellido *<input autocomplete="family-name" [formField]="registrationFields.apellido"></label>
+        @if (registrationFields.apellido().touched() && registrationFields.apellido().invalid()) { <small>Ingresa tu apellido.</small> }
+        <label>Usuario *<input autocomplete="username" [formField]="registrationFields.usuario"></label>
+        @if (registrationFields.usuario().touched() && registrationFields.usuario().invalid()) { <small>Ingresa un usuario.</small> }
+        <label>Contraseña *<input type="password" autocomplete="new-password" [formField]="registrationFields.contrasena"></label>
+        @if (registrationFields.contrasena().touched() && registrationFields.contrasena().invalid()) { <small>Usa al menos 8 caracteres.</small> }
+        <label>Repite la contraseña *<input type="password" autocomplete="new-password" [formField]="registrationFields.confirmacion"></label>
+        @if (registrationFields.confirmacion().touched() && registrationFields.confirmacion().invalid()) { <small>Repite la contraseña.</small> }
+        <button [disabled]="registrationFields().invalid() || busy()">{{ busy() ? 'Creando cuenta…' : 'Crear cuenta' }}</button>
+        <button type="button" class="link" (click)="showRegistration(false)">Ya tengo una cuenta</button>
+      </form>
+    } @else {
+      <form (submit)="submit($event)">
+        <label>Usuario<input [formField]="fields.usuario" autocomplete="username"></label>
+        @if (fields.usuario().touched() && fields.usuario().invalid()) { <small>Ingresa tu usuario.</small> }
+        <label>Contraseña<input type="password" [formField]="fields.contrasena" autocomplete="current-password"></label>
+        @if (fields.contrasena().touched() && fields.contrasena().invalid()) { <small>Ingresa tu contraseña.</small> }
+        <button [disabled]="fields().invalid() || busy()">{{ busy() ? 'Ingresando…' : 'Ingresar' }}</button>
+        <button type="button" class="link" (click)="showRegistration(true)">Crear una cuenta</button>
+      </form>
+    }
+  </section>
+</main>
