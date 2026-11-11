@@ -45,10 +45,11 @@ En `frontend/`:
 
 ```powershell
 npm install
+$env:API_PROXY_TARGET = "http://127.0.0.1:8000"
 npm start
 ```
 
-Abre `http://localhost:4200`. El archivo `proxy.conf.json` tiene una sola ruta: reenvía `/api/**` al backend. Así Angular no incluye `localhost` en sus solicitudes. Si FastAPI corre en otra dirección o puerto, cambia únicamente el `target` del proxy y reinicia `npm start`. En producción, configura el servidor web para reenviar `/api` a FastAPI bajo el mismo origen.
+Abre `http://localhost:4200`. El archivo `proxy.conf.cjs` tiene una sola ruta: reenvía `/api/**` al destino indicado por `API_PROXY_TARGET`. Así Angular no incluye `localhost` ni otra dirección fija en sus solicitudes. Si FastAPI corre en otra máquina o puerto, cambia el valor de esa variable antes de iniciar `npm start`. En producción, configura el servidor web para reenviar `/api` a FastAPI bajo el mismo origen.
 
 **El proxy solo reenvía solicitudes HTTP**. Los datos se guardan en la instancia indicada por `DB_SERVER`, no en el navegador ni en el proxy. Las credenciales SQL nunca se ponen en Angular.
 
